@@ -165,9 +165,23 @@ void drawCar(glm::mat4 carMat)
 
 //----------------------------------------------------------------------------
 
-void drawMan(glm::mat4 carMat)
+void drawMan(glm::mat4 manMat)
 {
-	
+	glm::mat4 modelMat, pvmMat;
+
+	//body
+	modelMat = glm::translate(manMat, glm::vec3(0, 0.2, 0));
+	modelMat = glm::scale(modelMat, glm::vec3(0.8, 1, 0.5));
+	pvmMat = projectMat * viewMat * modelMat;
+	glUniformMatrix4fv(pvmMatrixID, 1, GL_FALSE, &pvmMat[0][0]);
+	glDrawArrays(GL_TRIANGLES, 0, NumVertices);
+
+	//head
+	modelMat = glm::translate(manMat, glm::vec3(0, 0.85, 0));
+	modelMat = glm::scale(modelMat, glm::vec3(0.3, 0.3, 0.3));
+	pvmMat = projectMat * viewMat * modelMat;
+	glUniformMatrix4fv(pvmMatrixID, 1, GL_FALSE, &pvmMat[0][0]);
+	glDrawArrays(GL_TRIANGLES, 0, NumVertices);
 }
 
 //----------------------------------------------------------------------------
@@ -181,7 +195,8 @@ void display(void)
 
 	if (isDrawingCar)
 	{
-		drawCar(worldMat);
+		//drawCar(worldMat);
+		drawMan(glm::mat4(1.0f));
 	}
 	else
 	{
