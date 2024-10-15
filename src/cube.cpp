@@ -120,7 +120,7 @@ init()
 	pvmMatrixID = glGetUniformLocation(program, "mPVM");
 
 	projectMat = glm::perspective(glm::radians(65.0f), 1.0f, 0.1f, 100.0f);
-	viewMat = glm::lookAt(glm::vec3(0, 0, 3), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	viewMat = glm::lookAt(glm::vec3(0, 1, 10), glm::vec3(0, -1, 0), glm::vec3(0, 1, 0));
 
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -170,18 +170,29 @@ void drawMan(glm::mat4 manMat)
 	glm::mat4 modelMat, pvmMat;
 
 	//body
-	modelMat = glm::translate(manMat, glm::vec3(0, 0.2, 0));
-	modelMat = glm::scale(modelMat, glm::vec3(0.8, 1, 0.5));
+	modelMat = glm::translate(manMat, glm::vec3(0, 0, 0));
+	modelMat = glm::scale(modelMat, glm::vec3(2.1, 2.9, 1.2));
 	pvmMat = projectMat * viewMat * modelMat;
 	glUniformMatrix4fv(pvmMatrixID, 1, GL_FALSE, &pvmMat[0][0]);
 	glDrawArrays(GL_TRIANGLES, 0, NumVertices);
 
 	//head
-	modelMat = glm::translate(manMat, glm::vec3(0, 0.85, 0));
-	modelMat = glm::scale(modelMat, glm::vec3(0.3, 0.3, 0.3));
+	modelMat = glm::translate(manMat, glm::vec3(0, 2.3, 0));
+	modelMat = glm::scale(modelMat, glm::vec3(1, 1.3, 1));
 	pvmMat = projectMat * viewMat * modelMat;
 	glUniformMatrix4fv(pvmMatrixID, 1, GL_FALSE, &pvmMat[0][0]);
 	glDrawArrays(GL_TRIANGLES, 0, NumVertices);
+
+	//lArm
+
+
+	//lForeArm
+	//rArm
+	//rForeArm
+	//lUpperLeg
+	//lLowerLeg
+	//rUpperLeg
+	//rLowerLeg
 }
 
 //----------------------------------------------------------------------------
@@ -197,6 +208,7 @@ void display(void)
 	{
 		//drawCar(worldMat);
 		drawMan(glm::mat4(1.0f));
+		//drawMan(worldMat);
 	}
 	else
 	{
