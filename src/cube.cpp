@@ -119,8 +119,8 @@ init()
 
 	pvmMatrixID = glGetUniformLocation(program, "mPVM");
 
-	projectMat = glm::perspective(glm::radians(65.0f), 1.0f, 0.1f, 100.0f);
-	viewMat = glm::lookAt(glm::vec3(0, 1, 10), glm::vec3(0, -1, 0), glm::vec3(0, 1, 0));
+	projectMat = glm::perspective(glm::radians(10.0f), 1.0f, 0.1f, 100.0f);
+	viewMat = glm::lookAt(glm::vec3(0, 0, 10), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -168,23 +168,56 @@ void drawCar(glm::mat4 carMat)
 void drawMan(glm::mat4 manMat)
 {
 	glm::mat4 modelMat, pvmMat;
+	glm::vec3 ArmPos[4], ArmSize[2], LegPos[4], LegSize[2];
+
+	ArmPos[0] = glm::vec3(-1.575, 1.8, 0); //lArm
+	ArmPos[1] = glm::vec3(-1.575, -0.3, 0); //lForeArm
+	ArmPos[2] = glm::vec3(1.575, 1.8, 0); //rArm
+	ArmPos[3] = glm::vec3(1.575, -0.3, 0); //rForeArm
+
+	ArmSize[0] = glm::vec3(0.65, 1.9, 0.65); //Arm
+	ArmSize[1] = glm::vec3(0.5, 1.9, 0.5); //ForeArm
+
+	LegPos[0] = glm::vec3(-0.55, -1.35, 0); //lUpperLeg
+	LegPos[1] = glm::vec3(-0.55, -2.8, 0); //lLowerLeg
+	LegPos[2] = glm::vec3(0.55, -1.35, 0); //rUpperLeg
+	LegPos[3] = glm::vec3(0.55, -2.8, 0); //rLowerLeg
+
+	LegSize[0] = glm::vec3(0.8, 2.5, 0.8); //UpperLeg
+	LegSize[1] = glm::vec3(0.6, 2.5, 0.6); //LowerLeg
 
 	//body
-	modelMat = glm::translate(manMat, glm::vec3(0, 0, 0));
+	modelMat = glm::translate(manMat, glm::vec3(0, 1.5, 0));
 	modelMat = glm::scale(modelMat, glm::vec3(2.1, 2.9, 1.2));
 	pvmMat = projectMat * viewMat * modelMat;
 	glUniformMatrix4fv(pvmMatrixID, 1, GL_FALSE, &pvmMat[0][0]);
 	glDrawArrays(GL_TRIANGLES, 0, NumVertices);
 
 	//head
-	modelMat = glm::translate(manMat, glm::vec3(0, 2.3, 0));
+	modelMat = glm::translate(manMat, glm::vec3(0, 3.8, 0));
 	modelMat = glm::scale(modelMat, glm::vec3(1, 1.3, 1));
 	pvmMat = projectMat * viewMat * modelMat;
 	glUniformMatrix4fv(pvmMatrixID, 1, GL_FALSE, &pvmMat[0][0]);
 	glDrawArrays(GL_TRIANGLES, 0, NumVertices);
 
 	//lArm
+	for (int i = 0; i < 4; i++) 
+	{
+		modelMat = glm::translate(manMat, ArmPos[i]);
+		modelMat = glm::scale(modelMat, ArmSize[i%2]);
+		pvmMat = projectMat * viewMat * modelMat;
+		glUniformMatrix4fv(pvmMatrixID, 1, GL_FALSE, &pvmMat[0][0]);
+		glDrawArrays(GL_TRIANGLES, 0, NumVertices);
+	}
 
+	for (int i = 0; i < 4; i++)
+	{
+		modelMat = glm::translate(manMat, LegPos[i]);
+		modelMat = glm::scale(modelMat, LegSize[i % 2]);
+		pvmMat = projectMat * viewMat * modelMat;
+		glUniformMatrix4fv(pvmMatrixID, 1, GL_FALSE, &pvmMat[0][0]);
+		glDrawArrays(GL_TRIANGLES, 0, NumVertices);
+	}
 
 	//lForeArm
 	//rArm
