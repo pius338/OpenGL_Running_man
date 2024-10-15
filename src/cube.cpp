@@ -9,6 +9,8 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/transform.hpp"
+#include <cmath>
+#include <iostream>
 
 glm::mat4 projectMat;
 glm::mat4 viewMat;
@@ -16,6 +18,8 @@ glm::mat4 viewMat;
 GLuint pvmMatrixID;
 
 float rotAngle = 0.0f;
+float speed = 5.0f;
+float max_angle = glm::radians(45.0f);
 int isDrawingCar = false;
 
 typedef glm::vec4  color4;
@@ -128,40 +132,40 @@ init()
 
 //----------------------------------------------------------------------------
 
-void drawCar(glm::mat4 carMat)
-{
-	glm::mat4 modelMat, pvmMat;
-	glm::vec3 wheelPos[4];
-
-	wheelPos[0] = glm::vec3(0.3, 0.24, -0.1); // rear right
-	wheelPos[1] = glm::vec3(0.3, -0.24, -0.1); // rear left
-	wheelPos[2] = glm::vec3(-0.3, 0.24, -0.1); // front right
-	wheelPos[3] = glm::vec3(-0.3, -0.24, -0.1); // front left
-
-	// car body
-	modelMat = glm::scale(carMat, glm::vec3(1, 0.6, 0.2));
-	pvmMat = projectMat * viewMat * modelMat;
-	glUniformMatrix4fv(pvmMatrixID, 1, GL_FALSE, &pvmMat[0][0]);
-	glDrawArrays(GL_TRIANGLES, 0, NumVertices);
-
-	// car top
-	modelMat = glm::translate(carMat, glm::vec3(0, 0, 0.2));  //P*V*C*T*S*v
-	modelMat = glm::scale(modelMat, glm::vec3(0.5, 0.6, 0.2));
-	pvmMat = projectMat * viewMat * modelMat;
-	glUniformMatrix4fv(pvmMatrixID, 1, GL_FALSE, &pvmMat[0][0]);
-	glDrawArrays(GL_TRIANGLES, 0, NumVertices);
-
-	// car wheel
-	for (int i = 0; i < 4; i++)
-	{
-		modelMat = glm::translate(carMat, wheelPos[i]);  //P*V*C*T*S*v
-		modelMat = glm::scale(modelMat, glm::vec3(0.2, 0.1, 0.2));
-		modelMat = glm::rotate(modelMat, -rotAngle*50.0f, glm::vec3(0, 1, 0));
-		pvmMat = projectMat * viewMat * modelMat;
-		glUniformMatrix4fv(pvmMatrixID, 1, GL_FALSE, &pvmMat[0][0]);
-		glDrawArrays(GL_TRIANGLES, 0, NumVertices);
-	}
-}
+//void drawCar(glm::mat4 carMat)
+//{
+//	glm::mat4 modelMat, pvmMat;
+//	glm::vec3 wheelPos[4];
+//
+//	wheelPos[0] = glm::vec3(0.3, 0.24, -0.1); // rear right
+//	wheelPos[1] = glm::vec3(0.3, -0.24, -0.1); // rear left
+//	wheelPos[2] = glm::vec3(-0.3, 0.24, -0.1); // front right
+//	wheelPos[3] = glm::vec3(-0.3, -0.24, -0.1); // front left
+//
+//	// car body
+//	modelMat = glm::scale(carMat, glm::vec3(1, 0.6, 0.2));
+//	pvmMat = projectMat * viewMat * modelMat;
+//	glUniformMatrix4fv(pvmMatrixID, 1, GL_FALSE, &pvmMat[0][0]);
+//	glDrawArrays(GL_TRIANGLES, 0, NumVertices);
+//
+//	// car top
+//	modelMat = glm::translate(carMat, glm::vec3(0, 0, 0.2));  //P*V*C*T*S*v
+//	modelMat = glm::scale(modelMat, glm::vec3(0.5, 0.6, 0.2));
+//	pvmMat = projectMat * viewMat * modelMat;
+//	glUniformMatrix4fv(pvmMatrixID, 1, GL_FALSE, &pvmMat[0][0]);
+//	glDrawArrays(GL_TRIANGLES, 0, NumVertices);
+//
+//	// car wheel
+//	for (int i = 0; i < 4; i++)
+//	{
+//		modelMat = glm::translate(carMat, wheelPos[i]);  //P*V*C*T*S*v
+//		modelMat = glm::scale(modelMat, glm::vec3(0.2, 0.1, 0.2));
+//		modelMat = glm::rotate(modelMat, -rotAngle*50.0f, glm::vec3(0, 1, 0));
+//		pvmMat = projectMat * viewMat * modelMat;
+//		glUniformMatrix4fv(pvmMatrixID, 1, GL_FALSE, &pvmMat[0][0]);
+//		glDrawArrays(GL_TRIANGLES, 0, NumVertices);
+//	}
+//}
 
 //----------------------------------------------------------------------------
 
@@ -200,10 +204,13 @@ void drawMan(glm::mat4 manMat)
 	glUniformMatrix4fv(pvmMatrixID, 1, GL_FALSE, &pvmMat[0][0]);
 	glDrawArrays(GL_TRIANGLES, 0, NumVertices);
 
-	//lArm
+	//Arm
 	for (int i = 0; i < 4; i++) 
 	{
-		modelMat = glm::translate(manMat, ArmPos[i]);
+		modelMat = glm::translate(manMat, glm::vec3(0, 2.5, 0));
+		modelMat = glm::rotate(modelMat, rotAngle, glm::vec3(1, 0, 0));
+		modelMat = glm::translate(modelMat, glm::vec3(0, -2.5, 0));
+		modelMat = glm::translate(modelMat, ArmPos[i]);
 		modelMat = glm::scale(modelMat, ArmSize[i%2]);
 		pvmMat = projectMat * viewMat * modelMat;
 		glUniformMatrix4fv(pvmMatrixID, 1, GL_FALSE, &pvmMat[0][0]);
@@ -260,13 +267,12 @@ void idle()
 	static int prevTime = glutGet(GLUT_ELAPSED_TIME);
 	int currTime = glutGet(GLUT_ELAPSED_TIME);
 
-	if (abs(currTime - prevTime) >= 20)
-	{
-		float t = abs(currTime - prevTime);
-		rotAngle += glm::radians(t*360.0f / 10000.0f);
-		prevTime = currTime;
-		glutPostRedisplay();
-	}
+	float t = abs(currTime - prevTime)/1000.0f;
+	//rotAngle += glm::radians(t*360.0f / 10000.0f);
+	rotAngle = max_angle * std::sin(t * speed);
+	std::cout << rotAngle << '\n';
+
+	glutPostRedisplay();
 }
 
 //----------------------------------------------------------------------------
