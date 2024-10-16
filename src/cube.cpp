@@ -125,48 +125,11 @@ init()
 	pvmMatrixID = glGetUniformLocation(program, "mPVM");
 
 	projectMat = glm::perspective(glm::radians(10.0f), 1.0f, 0.1f, 100.0f);
-	viewMat = glm::lookAt(glm::vec3(10, 0, 10), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	viewMat = glm::lookAt(glm::vec3(3, 3, 13), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 }
-
-//----------------------------------------------------------------------------
-
-//void drawCar(glm::mat4 carMat)
-//{
-//	glm::mat4 modelMat, pvmMat;
-//	glm::vec3 wheelPos[4];
-//
-//	wheelPos[0] = glm::vec3(0.3, 0.24, -0.1); // rear right
-//	wheelPos[1] = glm::vec3(0.3, -0.24, -0.1); // rear left
-//	wheelPos[2] = glm::vec3(-0.3, 0.24, -0.1); // front right
-//	wheelPos[3] = glm::vec3(-0.3, -0.24, -0.1); // front left
-//
-//	// car body
-//	modelMat = glm::scale(carMat, glm::vec3(1, 0.6, 0.2));
-//	pvmMat = projectMat * viewMat * modelMat;
-//	glUniformMatrix4fv(pvmMatrixID, 1, GL_FALSE, &pvmMat[0][0]);
-//	glDrawArrays(GL_TRIANGLES, 0, NumVertices);
-//
-//	// car top
-//	modelMat = glm::translate(carMat, glm::vec3(0, 0, 0.2));  //P*V*C*T*S*v
-//	modelMat = glm::scale(modelMat, glm::vec3(0.5, 0.6, 0.2));
-//	pvmMat = projectMat * viewMat * modelMat;
-//	glUniformMatrix4fv(pvmMatrixID, 1, GL_FALSE, &pvmMat[0][0]);
-//	glDrawArrays(GL_TRIANGLES, 0, NumVertices);
-//
-//	// car wheel
-//	for (int i = 0; i < 4; i++)
-//	{
-//		modelMat = glm::translate(carMat, wheelPos[i]);  //P*V*C*T*S*v
-//		modelMat = glm::scale(modelMat, glm::vec3(0.2, 0.1, 0.2));
-//		modelMat = glm::rotate(modelMat, -rotAngle*50.0f, glm::vec3(0, 1, 0));
-//		pvmMat = projectMat * viewMat * modelMat;
-//		glUniformMatrix4fv(pvmMatrixID, 1, GL_FALSE, &pvmMat[0][0]);
-//		glDrawArrays(GL_TRIANGLES, 0, NumVertices);
-//	}
-//}
 
 //----------------------------------------------------------------------------
 
@@ -225,11 +188,12 @@ void drawMan(glm::mat4 manMat)
 		glDrawArrays(GL_TRIANGLES, 0, NumVertices);
 	}
 
+	//Leg
 	for (int i = 0; i < 4; i++)
 	{
-
-		float legAngle = (i < 2) ? -rotAngle * 1.5 : rotAngle * 1.5;
-		float lowerLegAngle = legAngle * 0.8;
+		float legAngle = (i < 2) ? -rotAngle : rotAngle;
+		legAngle = (legAngle * 1.5) - 0.3;
+		float lowerLegAngle = legAngle;
 		modelMat = glm::translate(manMat, glm::vec3(0, -0.4, 0));
 		modelMat = glm::rotate(modelMat, legAngle, glm::vec3(1, 0, 0));
 		modelMat = glm::translate(modelMat, glm::vec3(0, 0.4, 0));
@@ -254,20 +218,10 @@ void display(void)
 	glm::mat4 worldMat, pvmMat;
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//worldMat = glm::rotate(glm::mat4(1.0f), rotAngle, glm::vec3(1.0f, 1.0f, 0.0f));
 	worldMat = glm::translate(glm::mat4(1.0f), glm::vec3(0,upDown,0));
 	worldMat = glm::rotate(worldMat, glm::radians(8.0f), glm::vec3(1, 0, 0));
 
-	if (isDrawingCar)
-	{
-		drawMan(worldMat);
-	}
-	else
-	{
-		pvmMat = projectMat * viewMat * worldMat;
-		glUniformMatrix4fv(pvmMatrixID, 1, GL_FALSE, &pvmMat[0][0]);
-		glDrawArrays(GL_TRIANGLES, 0, NumVertices);
-	}
+	drawMan(worldMat);
 
 	glutSwapBuffers();
 }
@@ -294,10 +248,16 @@ void
 keyboard(unsigned char key, int x, int y)
 {
 	switch (key) {
-	case 'c': case 'C':
-		isDrawingCar = !isDrawingCar;
+	case '1':
+		viewMat = glm::lookAt(glm::vec3(13, 0, 0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 		break;
-	case 033:  // Escape key
+	case '2':
+		viewMat = glm::lookAt(glm::vec3(-1, 7, -12), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+		break;
+	case '3':
+		viewMat = glm::lookAt(glm::vec3(3, 3, 13), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+		break;
+	case 033:
 	case 'q': case 'Q':
 		exit(EXIT_SUCCESS);
 		break;
