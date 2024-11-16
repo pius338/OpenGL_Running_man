@@ -1,60 +1,23 @@
 #pragma once
 
-//////////////////////////////////////////////////////////////////////////////
+#include <vector>
+#include "glm/glm.hpp"
+#include "glm/gtc/constants.hpp"
 
-#ifndef _CUBE_H_
-#define _CUBE_H_
+using namespace std;
 
-#define _CRT_SECURE_NO_WARNINGS
+class Cube {
+public:
+	Cube();
+	~Cube();
 
-//----------------------------------------------------------------------------
-// 
-// --- Include system headers ---
-//
+	void generateCube();
 
-#include <cmath>
-#include <iostream>
+	static const int NumVertices = 36;
+	vector<glm::vec4> points;
+	vector<glm::vec4> normals;
+private:
+	void quad(int a, int b, int c, int d);
 
-//----------------------------------------------------------------------------
-//
-// --- Include OpenGL header files and helpers ---
-//
-//   The location of these files vary by operating system.  We've included
-//     copies of open-soruce project headers in the "GL" directory local
-//     this this "include" directory.
-//
-
-#ifdef __APPLE__  // include Mac OS X verions of headers
-#  include <OpenGL/OpenGL.h>
-#  include <GLUT/glut.h>
-#else // non-Mac OS X operating systems
-#  include "GL/glew.h"
-#  include "GL/freeglut.h"
-#  include "GL/freeglut_ext.h"
-#endif  // __APPLE__
-
-// Define a helpful macro for handling offsets into buffer objects
-#define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
-
-//----------------------------------------------------------------------------
-//
-//  --- Include our class libraries and constants ---
-//
-
-//  Helper function to load vertex and fragment shader files
-GLuint InitShader(const char* vertexShaderFile, const char* fragmentShaderFile);
-
-//  Defined constant for when numbers are too small to be used in the
-//    denominator of a division operation.  This is only used if the
-//    DEBUG macro is defined.
-const GLfloat  DivideByZeroTolerance = GLfloat(1.0e-07);
-
-
-#pragma comment(lib, "glew32.lib")
-
-//#include "CheckError.h"
-
-// #define Print(x)  do { std::cerr << #x " = " << (x) << std::endl; } while(0)
-
-
-#endif // _CUBE_H_
+	static const glm::vec4 vertices[8];
+};
