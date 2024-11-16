@@ -4,24 +4,29 @@ const int NO_LIGHT = 0, GOURAUD = 1, PHONG = 2;
 
 in  vec4 vPosition;
 in  vec4 vNormal;
-//in  vec4 vColor;
+in  vec2 vTexCoord;
 
 out vec4 fragPos;
 out vec4 color;
 out vec4 normal;
+out vec2 texCoord;
 
 uniform mat4 mProject;
 uniform mat4 mView;
 uniform mat4 mModel;
 uniform int shadeMode;
+uniform int isTexture;
 
 void main() 
 {
 	gl_Position = mProject * mView * mModel * vPosition;
-	
+
 	vec4 vColor = vec4(0, 0, 1, 1);
-	vec4 L = normalize(vec4(4, 1, 2, 0));
-	float kd = 0.8, ks = 2.0, ka = 0.2, shininess = 30;
+	if (isTexture == 1) {
+		vColor = vec4(2, 2, 2, 1);
+	}
+	vec4 L = normalize(vec4(3, 3, 5, 0));
+	float kd = 0.8, ks = 1.0, ka = 0.2, shininess = 10;
 	vec4 Id = vColor;
 	vec4 Is = vec4(1, 1, 1, 1);
 	vec4 Ia = vColor;
@@ -56,4 +61,6 @@ void main()
 		color = vColor;
 	}
 
+	// texture coordinate
+	texCoord = vTexCoord;
 } 

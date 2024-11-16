@@ -15,6 +15,7 @@ class Sphere {
 public:
 	vector<glm::vec4> verts;
 	vector<glm::vec4> normals;
+	vector<glm::vec2> texCoords;
 
 	Sphere() :Sphere(20, 20) {  }
 	Sphere(int n) :Sphere(n, n) {  }
@@ -30,8 +31,11 @@ public:
 	}
 private:
 	const float PI = glm::pi<float>();
+	int nLongitude;
+	int nLatitude;
 	void makeUV(int nLongi, int nLati);
 	void computeNormals();
+	void computeTexCoordQuad(glm::vec2 texcoord[4], int u, int v, int u2, int v2);
 };
 
 

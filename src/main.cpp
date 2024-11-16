@@ -1,6 +1,7 @@
 #include "cube.h"
 #include "sphere.h"
 #include "initShader.h"
+#include "texture.hpp"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/transform.hpp"
@@ -15,6 +16,8 @@ glm::mat4 viewMat;
 glm::mat4 modelMat = glm::mat4(1.0f);
 
 int shadeMode = NO_LIGHT;
+int isTexture = false;
+
 float rotAngle = 0.0f;
 float upDown = 0.0f;
 float speed = 8.0f;
@@ -24,6 +27,8 @@ GLuint projectMatrixID;
 GLuint viewMatrixID;
 GLuint modelMatrixID;
 GLuint shadeModeID;
+GLuint textureModeID;
+
 GLuint sphereVAO, cubeVAO;
 GLuint programID;
 
@@ -52,9 +57,12 @@ void init() {
 
 	int sphereVertSize = sizeof(sphere.verts[0]) * sphere.verts.size();
 	int sphereNormalSize = sizeof(sphere.normals[0]) * sphere.normals.size();
-	glBufferData(GL_ARRAY_BUFFER, sphereVertSize + sphereNormalSize, NULL, GL_STATIC_DRAW);
+	int spheretexSize = sizeof(sphere.texCoords[0]) * sphere.texCoords.size();
+	glBufferData(GL_ARRAY_BUFFER, sphereVertSize + sphereNormalSize + spheretexSize, NULL, GL_STATIC_DRAW);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sphereVertSize, sphere.verts.data());
 	glBufferSubData(GL_ARRAY_BUFFER, sphereVertSize, sphereNormalSize, sphere.normals.data());
+	glBufferSubData(GL_ARRAY_BUFFER, sphereVertSize + sphereNormalSize, spheretexSize, sphere.texCoords.data());
+
 
 	GLuint vPosition = glGetAttribLocation(program, "vPosition");
 	glEnableVertexAttribArray(vPosition);
@@ -63,6 +71,11 @@ void init() {
 	GLuint vNormal = glGetAttribLocation(program, "vNormal");
 	glEnableVertexAttribArray(vNormal);
 	glVertexAttribPointer(vNormal, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sphereVertSize));
+
+	GLuint vTexCoord = glGetAttribLocation(program, "vTexCoord");
+	glEnableVertexAttribArray(vTexCoord);
+	glVertexAttribPointer(vTexCoord, 2, GL_FLOAT, GL_FALSE, 0,
+		BUFFER_OFFSET(sphereVertSize + sphereNormalSize));
 
 	// Cube VAO
 
@@ -94,6 +107,23 @@ void init() {
 
 	shadeModeID = glGetUniformLocation(program, "shadeMode");
 	glUniform1i(shadeModeID, shadeMode);
+
+	textureModeID = glGetUniformLocation(program, "isTexture");
+	glUniform1i(textureModeID, isTexture);
+
+	// Load the texture using any two methods
+	GLuint Texture = loadBMP_custom("earth.bmp");
+	//GLuint Texture = loadDDS("uvtemplate.DDS");
+
+	// Get a handle for our "myTextureSampler" uniform
+	GLuint TextureID = glGetUniformLocation(program, "sphereTexture");
+
+	// Bind our texture in Texture Unit 0
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, Texture);
+
+	// Set our "myTextureSampler" sampler to use Texture Unit 0
+	glUniform1i(TextureID, 0);
 
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -232,6 +262,11 @@ keyboard(unsigned char key, int x, int y)
 	case 'l': case 'L':
 		shadeMode = (++shadeMode % NUM_LIGHT_MODE);
 		glUniform1i(shadeModeID, shadeMode);
+		glutPostRedisplay();
+		break;
+	case 't': case 'T':
+		isTexture = !isTexture;
+		glUniform1i(textureModeID, isTexture);
 		glutPostRedisplay();
 		break;
 	case '1':
