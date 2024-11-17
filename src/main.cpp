@@ -136,7 +136,7 @@ void init() {
 	GLuint upperLegTextureID = glGetUniformLocation(program, "upperLegTexture");
 	GLuint lowerLegTextureID = glGetUniformLocation(program, "lowerLegTexture");
 
-	// Bind our texture in Texture Unit 0
+	// Bind our texture in Texture Units
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, earTexture);
 	glActiveTexture(GL_TEXTURE1);
@@ -296,14 +296,6 @@ void display(void)
 
 	drawMan(worldMat);
 	
-	/*glBindVertexArray(cubeVAO);
-	glDrawArrays(GL_TRIANGLES, 0, Cube::NumVertices);*/
-
-
-	/*glUniformMatrix4fv(modelMatrixID, 1, GL_FALSE, &modelMat[0][0]);
-	glBindVertexArray(sphereVAO);
-	glDrawArrays(GL_TRIANGLES, 0, sphere.verts.size());*/
-
 	glutSwapBuffers();
 }
 

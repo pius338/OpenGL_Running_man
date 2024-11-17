@@ -12,7 +12,6 @@ public:
 	~Cube();
 
 	void generateCube();
-	void computeTexCoord();
 
 	static const int NumVertices = 36;
 	vector<glm::vec4> points;
