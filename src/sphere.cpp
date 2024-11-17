@@ -1,4 +1,6 @@
 #include "sphere.h"
+#include "glm/glm.hpp"
+#include "glm/gtx/transform.hpp"
 
 void Sphere::makeUV(int nLongi, int nLati)
 {
@@ -8,6 +10,9 @@ void Sphere::makeUV(int nLongi, int nLati)
 
 	nLongitude = nLongi;
 	nLatitude = nLati;
+	glm::mat4 xRotation = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1, 0, 0));
+	glm::mat4 yRotation = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0, 1, 0));
+
 	// make vertex list
 	for (int v = 0; v < nLati + 1; v++)
 	{
@@ -18,7 +23,11 @@ void Sphere::makeUV(int nLongi, int nLati)
 			float x = glm::sin(phi) * glm::cos(theta) * radius;
 			float y = glm::sin(phi) * glm::sin(theta) * radius;
 			float z = glm::cos(phi) * radius;
-			vertList.push_back(glm::vec4(x, y, z, 1));
+			glm::vec4 vertex = glm::vec4(x, y, z, 1);
+
+			vertex = yRotation * xRotation * vertex;
+
+			vertList.push_back(vertex);
 		}
 	}
 

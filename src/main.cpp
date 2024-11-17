@@ -84,15 +84,21 @@ void init() {
 
 	int cubeVertSize = sizeof(cube.points[0]) * cube.points.size();
 	int cubeNormalSize = sizeof(cube.normals[0]) * cube.normals.size();
-	glBufferData(GL_ARRAY_BUFFER, cubeVertSize + cubeNormalSize, NULL, GL_STATIC_DRAW);
+	int cubetexSize = sizeof(cube.texCoords[0]) * cube.texCoords.size();
+	glBufferData(GL_ARRAY_BUFFER, cubeVertSize + cubeNormalSize + cubetexSize, NULL, GL_STATIC_DRAW);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, cubeVertSize, cube.points.data());
 	glBufferSubData(GL_ARRAY_BUFFER, cubeVertSize, cubeNormalSize, cube.normals.data());
+	glBufferSubData(GL_ARRAY_BUFFER, cubeVertSize + cubeNormalSize, cubetexSize, cube.texCoords.data());
 
 	glEnableVertexAttribArray(vPosition);
 	glVertexAttribPointer(vPosition, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
 
 	glEnableVertexAttribArray(vNormal);
 	glVertexAttribPointer(vNormal, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(cubeVertSize));
+
+	glEnableVertexAttribArray(vTexCoord);
+	glVertexAttribPointer(vTexCoord, 2, GL_FLOAT, GL_FALSE, 0,
+		BUFFER_OFFSET(cubeVertSize + cubeNormalSize));
 
 	// Uniform Setup
 	projectMatrixID = glGetUniformLocation(program, "mProject");
@@ -112,21 +118,53 @@ void init() {
 	glUniform1i(textureModeID, isTexture);
 
 	// Load the texture using any two methods
-	GLuint Texture = loadBMP_custom("earth.bmp");
-	//GLuint Texture = loadDDS("uvtemplate.DDS");
+	GLuint earTexture = loadBMP_custom("ear.bmp");
+	GLuint faceTexture = loadBMP_custom("face.bmp");
+	GLuint bodyTexture = loadBMP_custom("body.bmp");
+	GLuint bagTexture = loadBMP_custom("bag.bmp");
+	GLuint foreArmTexture = loadBMP_custom("foreArm.bmp");
+	GLuint armTexture = loadBMP_custom("arm.bmp");
+	GLuint upperLegTexture = loadBMP_custom("upperLeg.bmp");
+	GLuint lowerLegTexture = loadBMP_custom("lowerLeg.bmp");
 
-	// Get a handle for our "myTextureSampler" uniform
-	GLuint TextureID = glGetUniformLocation(program, "sphereTexture");
+	GLuint earTextureID = glGetUniformLocation(program, "earTexture");
+	GLuint faceTextureID = glGetUniformLocation(program, "faceTexture");
+	GLuint bodyTextureID = glGetUniformLocation(program, "bodyTexture");
+	GLuint bagTextureID = glGetUniformLocation(program, "bagTexture");
+	GLuint foreArmTextureID = glGetUniformLocation(program, "foreArmTexture");
+	GLuint armTextureID = glGetUniformLocation(program, "armTexture");
+	GLuint upperLegTextureID = glGetUniformLocation(program, "upperLegTexture");
+	GLuint lowerLegTextureID = glGetUniformLocation(program, "lowerLegTexture");
 
 	// Bind our texture in Texture Unit 0
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, Texture);
+	glBindTexture(GL_TEXTURE_2D, earTexture);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, faceTexture);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, bodyTexture);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, bagTexture);
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, foreArmTexture);
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_2D, armTexture);
+	glActiveTexture(GL_TEXTURE6);
+	glBindTexture(GL_TEXTURE_2D, upperLegTexture);
+	glActiveTexture(GL_TEXTURE7);
+	glBindTexture(GL_TEXTURE_2D, lowerLegTexture);
 
-	// Set our "myTextureSampler" sampler to use Texture Unit 0
-	glUniform1i(TextureID, 0);
+	glUniform1i(earTextureID, 0);
+	glUniform1i(faceTextureID, 1);
+	glUniform1i(bodyTextureID, 2);
+	glUniform1i(bagTextureID, 3);
+	glUniform1i(foreArmTextureID, 4);
+	glUniform1i(armTextureID, 5);
+	glUniform1i(upperLegTextureID, 6);
+	glUniform1i(lowerLegTextureID, 7);
 
 	glEnable(GL_DEPTH_TEST);
-	glClearColor(0.0, 0.0, 0.0, 1.0);
+	glClearColor(0.12, 0.12, 0.12, 1.0);
 }
 
 //----------------------------------------------------------------------------
@@ -136,37 +174,66 @@ void drawMan(glm::mat4 manMat)
 	glm::mat4 modelMat;
 	glm::vec3 ArmPos[4], ArmSize[2], LegPos[4], LegSize[2];
 
-	ArmPos[0] = glm::vec3(-1.575, 1.8, 0); //lArm
-	ArmPos[1] = glm::vec3(-1.575, -0.3, 0); //lForeArm
-	ArmPos[2] = glm::vec3(1.575, 1.8, 0); //rArm
-	ArmPos[3] = glm::vec3(1.575, -0.3, 0); //rForeArm
+	ArmPos[0] = glm::vec3(-1.5, 1.5, 0); //lArm
+	ArmPos[1] = glm::vec3(-1.5, -0.7, 0); //lForeArm
+	ArmPos[2] = glm::vec3(1.5, 1.5, 0); //rArm
+	ArmPos[3] = glm::vec3(1.5, -0.7, 0); //rForeArm
 
-	ArmSize[0] = glm::vec3(0.65, 1.9, 0.65); //Arm
-	ArmSize[1] = glm::vec3(0.5, 1.9, 0.5); //ForeArm
+	ArmSize[0] = glm::vec3(0.3, 1.3, 0.3); //Arm
+	ArmSize[1] = glm::vec3(0.25, 1.3, 0.25); //ForeArm
 
-	LegPos[0] = glm::vec3(-0.55, -1.35, 0); //lUpperLeg
-	LegPos[1] = glm::vec3(-0.55, -4.15, 0); //lLowerLeg
-	LegPos[2] = glm::vec3(0.55, -1.35, 0); //rUpperLeg
-	LegPos[3] = glm::vec3(0.55, -4.15, 0); //rLowerLeg
+	LegPos[0] = glm::vec3(-0.85, -1.4, 0); //lUpperLeg
+	LegPos[1] = glm::vec3(-0.85, -4.3, 0.4); //lLowerLeg
+	LegPos[2] = glm::vec3(0.85, -1.4, 0); //rUpperLeg
+	LegPos[3] = glm::vec3(0.85, -4.3, 0.4); //rLowerLeg
 
-	LegSize[0] = glm::vec3(0.8, 2.5, 0.8); //UpperLeg
-	LegSize[1] = glm::vec3(0.6, 2.5, 0.6); //LowerLeg
+	LegSize[0] = glm::vec3(0.4, 1.7, 0.4); //UpperLeg
+	LegSize[1] = glm::vec3(0.3, 2, 0.3); //LowerLeg
 
 	glBindVertexArray(cubeVAO);
+
 	//body
+	glUniform1i(glGetUniformLocation(programID, "objectType"), 2);
 	modelMat = glm::translate(manMat, glm::vec3(0, 1.5, 0));
-	modelMat = glm::scale(modelMat, glm::vec3(2.1, 2.9, 1.2));
+	modelMat = glm::scale(modelMat, glm::vec3(2.4, 2.8, 1.8));
+	glUniformMatrix4fv(modelMatrixID, 1, GL_FALSE, &modelMat[0][0]);
+	glDrawArrays(GL_TRIANGLES, 0, cube.NumVertices);
+
+	//bag
+	glUniform1i(glGetUniformLocation(programID, "objectType"), 3);
+	modelMat = glm::translate(manMat, glm::vec3(0, 1.5, -1.6));
+	modelMat = glm::scale(modelMat, glm::vec3(1.8, 2, 1));
 	glUniformMatrix4fv(modelMatrixID, 1, GL_FALSE, &modelMat[0][0]);
 	glDrawArrays(GL_TRIANGLES, 0, cube.NumVertices);
 
 	//head
+	glUniform1i(glGetUniformLocation(programID, "objectType"), 0);
+	modelMat = glm::translate(manMat, glm::vec3(0, 3.7, 0));
+	modelMat = glm::scale(modelMat, glm::vec3(2, 1.4, 1.5));
+	glUniformMatrix4fv(modelMatrixID, 1, GL_FALSE, &modelMat[0][0]);
+	glDrawArrays(GL_TRIANGLES, 0, cube.NumVertices);
+
 	glBindVertexArray(sphereVAO);
-	modelMat = glm::translate(manMat, glm::vec3(0, 3.8, 0));
-	modelMat = glm::scale(modelMat, glm::vec3(1, 1.3, 1));
+
+	//face
+	glUniform1i(glGetUniformLocation(programID, "objectType"), 1);
+	modelMat = glm::translate(manMat, glm::vec3(0, 3.7, 0.75));
+	modelMat = glm::scale(modelMat, glm::vec3(0.8, 0.6, 0.1));
 	glUniformMatrix4fv(modelMatrixID, 1, GL_FALSE, &modelMat[0][0]);
 	glDrawArrays(GL_TRIANGLES, 0, sphere.verts.size());
 
-	glBindVertexArray(cubeVAO);
+	//Ear
+	glUniform1i(glGetUniformLocation(programID, "objectType"), 0);
+	modelMat = glm::translate(manMat, glm::vec3(-0.7, 4.4, 0));
+	modelMat = glm::scale(modelMat, glm::vec3(0.3, 0.4, 0.6));
+	glUniformMatrix4fv(modelMatrixID, 1, GL_FALSE, &modelMat[0][0]);
+	glDrawArrays(GL_TRIANGLES, 0, sphere.verts.size());
+
+	modelMat = glm::translate(manMat, glm::vec3(0.7, 4.4, 0));
+	modelMat = glm::scale(modelMat, glm::vec3(0.3, 0.4, 0.6));
+	glUniformMatrix4fv(modelMatrixID, 1, GL_FALSE, &modelMat[0][0]);
+	glDrawArrays(GL_TRIANGLES, 0, sphere.verts.size());
+	
 
 	//Arm
 	for (int i = 0; i < 4; i++)
@@ -183,10 +250,11 @@ void drawMan(glm::mat4 manMat)
 		}
 		modelMat = glm::translate(modelMat, ArmPos[i]);
 		modelMat = glm::scale(modelMat, ArmSize[i % 2]);
+		if (i % 2) glUniform1i(glGetUniformLocation(programID, "objectType"), 5);
+		else glUniform1i(glGetUniformLocation(programID, "objectType"), 4);
 		glUniformMatrix4fv(modelMatrixID, 1, GL_FALSE, &modelMat[0][0]);
-		glDrawArrays(GL_TRIANGLES, 0, cube.NumVertices);
+		glDrawArrays(GL_TRIANGLES, 0, sphere.verts.size());
 	}
-
 	//Leg
 	for (int i = 0; i < 4; i++)
 	{
@@ -204,8 +272,10 @@ void drawMan(glm::mat4 manMat)
 		}
 		modelMat = glm::translate(modelMat, LegPos[i]);
 		modelMat = glm::scale(modelMat, LegSize[i % 2]);
+		if (i % 2) glUniform1i(glGetUniformLocation(programID, "objectType"), 7);
+		else glUniform1i(glGetUniformLocation(programID, "objectType"), 6);
 		glUniformMatrix4fv(modelMatrixID, 1, GL_FALSE, &modelMat[0][0]);
-		glDrawArrays(GL_TRIANGLES, 0, cube.NumVertices);
+		glDrawArrays(GL_TRIANGLES, 0, sphere.verts.size());
 	}
 }
 
@@ -255,8 +325,7 @@ void idle()
 
 //----------------------------------------------------------------------------
 
-void
-keyboard(unsigned char key, int x, int y)
+void keyboard(unsigned char key, int x, int y)
 {
 	switch (key) {
 	case 'l': case 'L':
@@ -299,8 +368,7 @@ void resize(int w, int h)
 
 //----------------------------------------------------------------------------
 
-int
-main(int argc, char** argv)
+int main(int argc, char** argv)
 {
 
 	glutInit(&argc, argv);
